@@ -1,16 +1,20 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const client = new Anthropic();
-
-const WORDPRESS_URL = process.env.WORDPRESS_URL || "https://gujaratmirror.in";
-const WORDPRESS_USER = process.env.WORDPRESS_USER || "admin";
-const WORDPRESS_PASSWORD = process.env.WORDPRESS_PASSWORD;
+const client = new Anthropic({
+  apiKey: process.env.CLAUDE_API_KEY,
+});
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
-  res.setHeader("Access-Control-Allow-Headers", "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,OPTIONS,PATCH,DELETE,POST,PUT"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+  );
 
   if (req.method === "OPTIONS") {
     res.status(200).end();
@@ -30,8 +34,8 @@ export default async function handler(req, res) {
 
     if (action === "generate") {
       if (!articleTitle || !articleContent) {
-        return res.status(400).json({ 
-          error: "articleTitle and articleContent are required" 
+        return res.status(400).json({
+          error: "articleTitle and articleContent are required",
         });
       }
 
@@ -61,7 +65,7 @@ Return this exact JSON format:
       try {
         const responseText = message.content[0].text;
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        
+
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
           return res.status(200).json({
@@ -69,7 +73,7 @@ Return this exact JSON format:
             ...parsed,
           });
         }
-        
+
         return res.status(200).json({
           success: true,
           gujaratiTitle: articleTitle,
@@ -91,13 +95,18 @@ Return this exact JSON format:
     }
 
     if (action === "publish") {
-      const { gujaratiTitle, gujaratiContent, keywords, metaDescription, slug } = req.body;
+      const { gujaratiTitle, gujaratiContent, keywords, metaDescription, slug } =
+        req.body;
 
       if (!gujaratiTitle || !gujaratiContent) {
-        return res.status(400).json({ 
-          error: "gujaratiTitle and gujaratiContent required for publishing" 
+        return res.status(400).json({
+          error: "gujaratiTitle and gujaratiContent required for publishing",
         });
       }
+
+      const WORDPRESS_PASSWORD = process.env.WORDPRESS_PASSWORD;
+      const WORDPRESS_URL = process.env.WORDPRESS_URL || "https://gujaratmirror.in";
+      const WORDPRESS_USER = process.env.WORDPRESS_USER || "admin";
 
       if (!WORDPRESS_PASSWORD) {
         return res.status(500).json({
@@ -105,9 +114,9 @@ Return this exact JSON format:
         });
       }
 
-      const auth = Buffer.from(
-        `${WORDPRESS_USER}:${WORDPRESS_PASSWORD}`
-      ).toString("base64");
+      const auth = Buffer.from(`${WORDPRESS_USER}:${WORDPRESS_PASSWORD}`).toString(
+        "base64"
+      );
 
       const postData = {
         title: gujaratiTitle,
@@ -143,8 +152,8 @@ Return this exact JSON format:
       });
     }
 
-    return res.status(400).json({ 
-      error: "Invalid action. Use 'generate' or 'publish'." 
+    return res.status(400).json({
+      error: "Invalid action. Use 'generate' or 'publish'.",
     });
   } catch (error) {
     console.error("Error:", error);
