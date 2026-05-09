@@ -1,16 +1,15 @@
 {
   "version": 2,
-  "functions": {
-    "api/publish.js": {
-      "runtime": "nodejs18.x",
-      "memory": 1024,
-      "maxDuration": 60
+  "builds": [
+    {
+      "src": "api/*.js",
+      "use": "@vercel/node"
     }
-  },
+  ],
   "routes": [
     {
-      "src": "/api/.*",
-      "dest": "/api/publish.js"
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
     }
   ]
 }
