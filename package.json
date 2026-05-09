@@ -4,7 +4,7 @@
   "description": "Publish articles to WordPress in Gujarati with SEO optimization",
   "type": "module",
   "engines": {
-    "node": "24.x"
+    "node": "18.x"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.28.0",
